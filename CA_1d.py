@@ -7,15 +7,14 @@ def debug(array):
     plt.imshow(array)
     plt.show() 
 
-def CA(U,h,w,A,B):
-    CA = np.zeros((h,w))
-    for i in range(1,h-1):
-        for j in range(1,w-1):
-            Ujk_n = np.max((U[i-1][j],U[i+1][j],U[i][j-1],U[i][j+1]))
-            
-            CA[i][j] = calc_value(Ujk_n,A,B)
+def CA_1d(U,w,A,B):
+    CA = np.zeros((w))
+    for i in range(1,w-1):
+        Ujk_n = np.max((U[i-1],U[i+1]))
+        CA[i] = calc_value(Ujk_n,A,B)
 
     return CA
+
 def calc_value(Ujk_n,A,B):
     if Ujk_n < B/2:
         return 0
@@ -26,47 +25,41 @@ def calc_value(Ujk_n,A,B):
         
 def main():
 
-    print(img.shape)
-    img_ = img[:,:,1]
-    h = len(img_)
-    w = len(img_[0])
-    # h = 100
-    # w = 100 
-    img_f = FFT(img_) 
-    img_if = IFFT(img_f)
-    # debug(img_if)
+    w =  13
+    A = 5
+    B = 2
+    data = []
+    U = np.zeros((w))
 
-
-    U = np.zeros((h,w))
     if p.mode == "erosion":
-        for i in range(h):
-            for j in range(w):
-                x_ = abs(j-int(w/2))
-                y_ = abs(i-int(h/2))
-                U[i][j] = x_ + y_
+        for i in range(w):
+            x_ = abs(i-int(w/2))
+            U[i]= x_
     else:
-        for i in range(h):
-            for j in range(w):
-                x_ = abs(j-int(w/2))
-                y_ = abs(i-int(h/2))
-                U[i][j] = x_ + y_
+        for i in range(w):
+            x_ = abs(i-int(w/2))
+            U[i] = x_
         in_value = np.max(U)
-        U = abs(in_value - U)
-    debug(U)
+        U = abs(in_value - U)-1
     
-    CA_2D = CA(U,h,w,p.A,p.B)
-    fact = normalize(CA_2D)
-    img_masked_f = img_f * fact
-    img_if = IFFT(img_masked_f)
+    print(U[1:w-1])
+    data.append(U[1:w-1])
+    CA = CA_1d(U,w,A,B)
+    print(CA[1:w-1])
+    data.append(CA[1:w-1])
+    for i in range(12):
+        CA = CA_1d(CA,w,A,B)
+        print(CA[1:w-1])
+        data.append(CA[1:w-1])
 
-
-    for i in range(100):
-        CA_2D = CA(CA_2D,h,w,p.A,p.B)
-        fact = normalize(CA_2D)
-        img_masked_f = img_f * fact
-        img_if = IFFT(img_masked_f)
-        debug(img_if)
-
+    plt.imshow(np.array(data))
+    plt.xlabel("空間 j ")
+    plt.xticks(range(w-2))
+    plt.ylabel("時間経過 n ")
+    plt.yticks(range(12))
+    plt.colorbar()
+    # plt.grid(c='white', zorder=50)
+    plt.show() 
 
 if __name__ == "__main__":
     main()
