@@ -27,7 +27,7 @@ def main():
 
     w =  13
     A = 5
-    B = 2
+    B = 0
     data = []
     U = np.zeros((w))
 

@@ -58,21 +58,13 @@ def filtering(CA,img_f,h,w):
     img_if = IFFT(img_masked_f)
     return img_if
 
-def calc_MSE(array_true,array_pred):
-    sub = np.sum((array_true - array_pred)**2)
-    N = len(array_true) * len(array_true[0])
-    MSE = sub/N
-    print(MSE)
-    return MSE 
-
-def main():
+def main(B):
     if p.input_data == "test":
         h = 102
         w = 102 
 
     else:
         img = cv2.imread(p.path)
-        print(img.shape)
         img_ = img[:,:,1]
         h = len(img_) + 2
         w = len(img_[0]) + 2
@@ -95,7 +87,7 @@ def main():
                 U[i][j] = x_ + y_
         in_value = np.max(U)
         U = abs(in_value - U)
-    debug_CA(U[1:h-1,1:w-1])
+    # debug_CA(U[1:h-1,1:w-1])
     
     if p.input_data == "image":
         img_masked_f = filtering(U,img_f,h,w)
@@ -103,23 +95,32 @@ def main():
 
 
 
-    CA_2D = CA(U,h,w,p.A,p.B)
+    CA_2D = CA(U,h,w,p.A,B)
     if p.input_data == "image":
         img_masked_f = filtering(CA_2D,img_f,h,w)
         debug_img(img_masked_f[1:h-1,1:w-1])
         debug_CA(CA_2D[1:h-1,1:w-1])
 
 
-    for i in range(100):
-        CA_2D = CA(CA_2D,h,w,p.A,p.B)
+    for i in range(200):
+        CA_2D = CA(CA_2D,h,w,p.A,B)
         if p.input_data == "image":
             img_masked_f = filtering(CA_2D,img_f,h,w)
             debug_img(img_masked_f[1:h-1,1:w-1])
             debug_CA(CA_2D[1:h-1,1:w-1])
-            print(calc_MSE(img_,img_masked_f))
         else:
-            debug_CA(CA_2D[1:h-1,1:w-1]) 
+            # debug_CA(CA_2D[1:h-1,1:w-1]) 
+            sub = CA_2D[1:h-1,1:w-1] == p.A
+            if sub.all():
+                flag = True
+                break
+    print(i+2)
+    return flag
 
 if __name__ == "__main__":
-    main()
+    for i in range(150):
+        B = i - 10
+        flag = main(B)
+        if flag == False:
+            break
 

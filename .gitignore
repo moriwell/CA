@@ -1,7 +1,8 @@
 # original #########################################
 *.mhd
 *.docx
-
+*.pptx
+*.xlsx
 #headers/mist-v1.6.0/*
 !.gitkeep
 
